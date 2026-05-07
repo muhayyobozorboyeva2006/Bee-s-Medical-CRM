@@ -10,52 +10,20 @@ import {
     Users,
     ChartColumn,
 } from "lucide-react";
-import { useMemo, useState } from "react";
-
-const chartDates = [
-    "2026-03-07",
-    "2026-03-08",
-    "2026-03-09",
-    "2026-03-10",
-    "2026-03-11",
-];
+import { useState } from "react";
+import { useStatisticsOverview } from "@/features/statistics/hooks/use-statistics";
 
 export default function StatisticsOverviewPage() {
     const [collapsed, setCollapsed] = useState(false);
 
-    const stats = useMemo(
-        () => [
-            {
-                title: "UMUMIY TUSHUM",
-                value: "0",
-                suffix: "UZS",
-                subtext: "",
-            },
-            {
-                title: "FAKTURALAR (JAMI)",
-                value: "0",
-                suffix: "",
-                subtext: "To‘langan 0 • Bekor qilingan 0",
-            },
-            {
-                title: "JINS BO‘YICHA ULUSH",
-                value: "0%",
-                suffix: "Erkak",
-                subtext: "0 / 0",
-            },
-            {
-                title: "30 KUN",
-                value: "0",
-                suffix: "UZS",
-                subtext: "Soni: 0",
-            },
-        ],
-        []
-    );
+    const { data, isLoading } = useStatisticsOverview();
+
+    const stats = data?.stats ?? [];
+    const chartDates = data?.chartDates ?? [];
+    const cacheInfo = data?.cacheInfo;
 
     return (
         <div className="space-y-6">
-            {/* TOP HERO */}
             <section className="overflow-hidden rounded-[30px] bg-gradient-to-r from-[#10b981] via-[#0796c9] to-[#1686d9] px-8 py-9 text-white shadow-[0_20px_40px_rgba(15,23,42,0.08)]">
                 <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
                     <div className="max-w-[760px]">
@@ -76,13 +44,18 @@ export default function StatisticsOverviewPage() {
 
                             <span className="mx-2 text-[#d4a24a]">•</span>
 
-                            <span>Oxirgi: —</span>
+                            <span>
+                                Oxirgi: {cacheInfo?.last_calculated_at ?? "—"}
+                            </span>
 
                             <span className="mx-2 text-[#d4a24a]">•</span>
 
-                            <span>Hisoblanmoqda (0/7)</span>
+                            <span>{cacheInfo?.progress_label ?? "Hisoblanmoqda (0/7)"}</span>
 
-                            <button className="ml-4 rounded-full bg-white/70 px-4 py-1.5 text-[14px] font-semibold text-[#b7791f] transition hover:bg-white">
+                            <button
+                                type="button"
+                                className="ml-4 rounded-full bg-white/70 px-4 py-1.5 text-[14px] font-semibold text-[#b7791f] transition hover:bg-white"
+                            >
                                 Qayta hisoblash
                             </button>
                         </div>
@@ -102,35 +75,49 @@ export default function StatisticsOverviewPage() {
                 </div>
 
                 <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-                    {stats.map((item) => (
-                        <div
-                            key={item.title}
-                            className="rounded-[24px] border border-white/10 bg-white/10 p-5 backdrop-blur-[2px]"
-                        >
-                            <p className="text-[16px] font-bold uppercase tracking-wide text-white/65">
-                                {item.title}
-                            </p>
-
-                            <div className="mt-4 flex items-end gap-2">
-                                <span className="text-[54px] font-extrabold leading-none">
-                                    {item.value}
-                                </span>
-                                {item.suffix && (
-                                    <span className="pb-1 text-[24px] font-bold text-white/90">
-                                        {item.suffix}
-                                    </span>
-                                )}
+                    {isLoading
+                        ? Array.from({ length: 4 }).map((_, index) => (
+                            <div
+                                key={index}
+                                className="rounded-[24px] border border-white/10 bg-white/10 p-5 backdrop-blur-[2px]"
+                            >
+                                <div className="space-y-4">
+                                    <div className="h-5 w-36 rounded bg-white/20" />
+                                    <div className="h-14 w-24 rounded bg-white/20" />
+                                    <div className="h-5 w-28 rounded bg-white/20" />
+                                </div>
                             </div>
+                        ))
+                        : stats.map((item) => (
+                            <div
+                                key={item.title}
+                                className="rounded-[24px] border border-white/10 bg-white/10 p-5 backdrop-blur-[2px]"
+                            >
+                                <p className="text-[16px] font-bold uppercase tracking-wide text-white/65">
+                                    {item.title}
+                                </p>
 
-                            <p className="mt-3 min-h-[24px] text-[18px] font-medium text-white/65">
-                                {item.subtext}
-                            </p>
-                        </div>
-                    ))}
+                                <div className="mt-4 flex items-end gap-2">
+                                    <span className="text-[54px] font-extrabold leading-none">
+                                        {item.value}
+                                    </span>
+
+                                    {item.suffix && (
+                                        <span className="pb-1 text-[24px] font-bold text-white/90">
+                                            {item.suffix}
+                                        </span>
+                                    )}
+                                </div>
+
+                                <p className="mt-3 min-h-[24px] text-[18px] font-medium text-white/65">
+                                    {item.subtext}
+                                </p>
+                            </div>
+                        ))}
                 </div>
+
             </section>
 
-            {/* MAIN WRAPPER */}
             <section className="rounded-[28px] border border-[#e6edf5] bg-white p-4 shadow-[0_16px_35px_rgba(15,23,42,0.05)] sm:p-5 lg:p-6">
                 <div className="flex items-center justify-between">
                     <h2 className="text-[33px] font-extrabold tracking-[-0.02em] text-[#1d2c44]">
@@ -150,7 +137,7 @@ export default function StatisticsOverviewPage() {
 
                 {!collapsed && (
                     <div className="mt-5 space-y-6">
-                        {/* TOP LONG CARD */}
+                        {/* umumiy statistics qismni manbalar bo'yicha trend qism */}
                         <div className="rounded-[26px] border border-[#d8ccff] bg-white p-5 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
                             <div className="flex items-center justify-between gap-3">
                                 <div className="flex items-center gap-3">
@@ -165,17 +152,116 @@ export default function StatisticsOverviewPage() {
                                 </span>
                             </div>
 
-                            <div className="flex h-[220px] items-center justify-center">
-                                <div className="text-center text-[#8ea1bb]">
-                                    <Share2 className="mx-auto h-8 w-8" />
-                                    <p className="mt-3 text-[16px] font-medium">Ma’lumot yo‘q</p>
+                            <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+                                <div className="rounded-[20px] border border-[#f0eaff] bg-gradient-to-br from-[#fcfbff] to-[#f8faff] p-5">
+                                    <div className="flex h-full min-h-[260px] items-center justify-center">
+                                        <div className="w-full">
+                                            <div className="mb-6 flex items-center justify-between text-[13px] font-medium text-[#94a3b8]">
+                                                <span>Boshlanish</span>
+                                                <span>Trend chizig‘i</span>
+                                                <span>Oxiri</span>
+                                            </div>
+
+                                            <div className="space-y-6">
+                                                <div className="h-[2px] w-full rounded-full bg-gradient-to-r from-[#ede9fe] via-[#c4b5fd] to-[#ede9fe]" />
+                                                <div className="h-[2px] w-[92%] rounded-full bg-gradient-to-r from-[#e9f7ff] via-[#93c5fd] to-[#e9f7ff]" />
+                                                <div className="h-[2px] w-[96%] rounded-full bg-gradient-to-r from-[#eef2ff] via-[#818cf8] to-[#eef2ff]" />
+                                                <div className="h-[2px] w-[88%] rounded-full bg-gradient-to-r from-[#f5f3ff] via-[#a78bfa] to-[#f5f3ff]" />
+                                            </div>
+
+                                            <div className="mt-8 grid grid-cols-3 gap-3 text-center">
+                                                <div className="rounded-[14px] bg-white px-3 py-3 shadow-[0_4px_14px_rgba(15,23,42,0.04)]">
+                                                    <p className="text-[12px] text-[#94a3b8]">Faol manba</p>
+                                                    <p className="mt-1 text-[16px] font-bold text-[#1d2c44]">
+                                                        {data?.sourceTrends?.[0]?.source ?? "—"}
+                                                    </p>
+                                                </div>
+
+                                                <div className="rounded-[14px] bg-white px-3 py-3 shadow-[0_4px_14px_rgba(15,23,42,0.04)]">
+                                                    <p className="text-[12px] text-[#94a3b8]">Jami manba</p>
+                                                    <p className="mt-1 text-[16px] font-bold text-[#1d2c44]">
+                                                        {data?.sourceTrends?.length ?? 0}
+                                                    </p>
+                                                </div>
+
+                                                <div className="rounded-[14px] bg-white px-3 py-3 shadow-[0_4px_14px_rgba(15,23,42,0.04)]">
+                                                    <p className="text-[12px] text-[#94a3b8]">Jami lead</p>
+                                                    <p className="mt-1 text-[16px] font-bold text-[#1d2c44]">
+                                                        {data?.sourceTrends?.reduce((sum, item) => sum + item.count, 0) ?? 0}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="rounded-[20px] border border-[#eef2f7] bg-[#fbfcfe] p-3">
+                                    {data?.sourceTrends?.length ? (
+                                        <div className="max-h-[320px] space-y-3 overflow-y-auto pr-2">
+                                            {data.sourceTrends.map((item, index) => {
+                                                const maxCount = Math.max(
+                                                    ...data.sourceTrends.map((trend) => trend.count),
+                                                    1
+                                                );
+                                                const percent = (item.count / maxCount) * 100;
+
+                                                return (
+                                                    <div
+                                                        key={item.source}
+                                                        className="rounded-[18px] border border-[#eef2f7] bg-white p-4 shadow-[0_8px_20px_rgba(15,23,42,0.05)]"
+                                                    >
+                                                        <div className="flex items-center justify-between gap-4">
+                                                            <div className="flex min-w-0 items-center gap-3">
+                                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f3f4ff] text-[14px] font-bold text-[#7c3aed]">
+                                                                    {index + 1}
+                                                                </div>
+
+                                                                <div className="min-w-0">
+                                                                    <p className="truncate text-[15px] font-semibold text-[#1d2c44]">
+                                                                        {item.source}
+                                                                    </p>
+                                                                    <p className="mt-1 text-[13px] text-[#94a3b8]">
+                                                                        Kelgan bemorlar manbasi
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="shrink-0 text-right">
+                                                                <p className="text-[20px] font-extrabold leading-none text-[#7c3aed]">
+                                                                    {item.count}
+                                                                </p>
+                                                                <p className="mt-1 text-[12px] font-medium text-[#94a3b8]">
+                                                                    ta lead
+                                                                </p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="mt-4 h-[8px] overflow-hidden rounded-full bg-[#eef2ff]">
+                                                            <div
+                                                                className="h-full rounded-full bg-gradient-to-r from-[#8b5cf6] to-[#6366f1] transition-all duration-500"
+                                                                style={{ width: `${percent}%` }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    ) : (
+                                        <div className="flex min-h-[260px] items-center justify-center rounded-[16px] border border-dashed border-[#dbe4ee] bg-white text-center text-[#8ea1bb]">
+                                            <div>
+                                                <Share2 className="mx-auto h-8 w-8 text-[#b0bfd4]" />
+                                                <p className="mt-3 text-[16px] font-medium">Ma’lumot yo‘q</p>
+                                                <p className="mt-1 text-[13px] text-[#a0aec0]">
+                                                    Manbalar statistikasi hali shakllanmagan
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
-
-                        {/* MIDDLE GRID */}
+                        {/* umumiy statistics qismni kunlar bo'yicha tushun */}
                         <div className="grid gap-6 xl:grid-cols-[1fr_0.95fr]">
-                            {/* LEFT CHART */}
                             <div className="rounded-[26px] border border-[#88efc9] bg-white p-5 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
                                 <div className="flex items-center justify-between gap-3">
                                     <div className="flex items-center gap-3">
@@ -186,20 +272,54 @@ export default function StatisticsOverviewPage() {
                                     </div>
 
                                     <span className="text-[15px] font-medium text-[#97a6bc]">
-                                        7 ta kun
+                                        {data?.dailyRevenue?.length ?? 0} ta kun
                                     </span>
                                 </div>
 
                                 <div className="mt-5 rounded-[18px] bg-white">
-                                    <div className="relative h-[240px] overflow-hidden rounded-[16px]">
-                                        <div className="absolute inset-0 px-5">
-                                            <div className="h-[25%] border-b border-[#eef2f7]" />
-                                            <div className="h-[25%] border-b border-[#eef2f7]" />
-                                            <div className="h-[25%] border-b border-[#eef2f7]" />
-                                            <div className="h-[25%]" />
-                                        </div>
+                                    <div className="grid gap-3">
+                                        {data?.dailyRevenue?.length ? (
+                                            data.dailyRevenue.map((item) => {
+                                                const maxAmount = Math.max(
+                                                    ...data.dailyRevenue.map((revenue) => revenue.amount),
+                                                    1
+                                                );
+                                                const percent = (item.amount / maxAmount) * 100;
 
-                                        <div className="absolute bottom-5 left-6 right-6 h-[4px] rounded-full bg-[#7c3aed]" />
+                                                return (
+                                                    <div
+                                                        key={item.date}
+                                                        className="rounded-[16px] border border-[#eef2f7] bg-[#fbfcfe] p-4"
+                                                    >
+                                                        <div className="flex items-center justify-between gap-4">
+                                                            <div>
+                                                                <p className="text-[14px] font-semibold text-[#1d2c44]">
+                                                                    {item.date}
+                                                                </p>
+                                                                <p className="mt-1 text-[13px] text-[#94a3b8]">
+                                                                    Kunlik tushum
+                                                                </p>
+                                                            </div>
+
+                                                            <p className="text-[18px] font-extrabold text-[#7c3aed]">
+                                                                {item.amount.toLocaleString()} UZS
+                                                            </p>
+                                                        </div>
+
+                                                        <div className="mt-3 h-[8px] overflow-hidden rounded-full bg-[#eef2ff]">
+                                                            <div
+                                                                className="h-full rounded-full bg-gradient-to-r from-[#8b5cf6] to-[#6366f1]"
+                                                                style={{ width: `${percent}%` }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })
+                                        ) : (
+                                            <div className="flex h-[240px] items-center justify-center text-[#8ea1bb]">
+                                                Ma’lumot yo‘q
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
@@ -208,8 +328,7 @@ export default function StatisticsOverviewPage() {
                                     Umumiy tushum
                                 </div>
                             </div>
-
-                            {/* RIGHT CARD */}
+                            {/* umumiy statistics qismni kunlar bo'yicha bemorlar */}
                             <div className="overflow-hidden rounded-[26px] border border-[#9ae6c4] bg-gradient-to-r from-[#abd8f7] to-[#9ae6c4] shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
                                 <div className="m-[1px] rounded-[25px] bg-white p-5">
                                     <div className="flex items-center justify-between gap-3">
@@ -221,27 +340,74 @@ export default function StatisticsOverviewPage() {
                                         </div>
 
                                         <span className="text-[15px] font-medium text-[#97a6bc]">
-                                            0 ta kun
+                                            {data?.dailyPatients?.length ?? 0} ta kun
                                         </span>
                                     </div>
 
-                                    <div className="flex h-[190px] items-center justify-center">
-                                        <div className="text-center text-[#8ea1bb]">
-                                            <ChartColumn className="mx-auto h-8 w-8" />
-                                            <p className="mt-3 text-[16px] font-medium">
-                                                Ma’lumot yo‘q
-                                            </p>
+                                    {data?.dailyPatients?.length ? (
+                                        <div className="mt-5 max-h-[260px] space-y-3 overflow-y-auto pr-2">
+                                            {data.dailyPatients.map((item) => {
+                                                const maxCount = Math.max(
+                                                    ...data.dailyPatients.map((patient) => patient.count),
+                                                    1
+                                                );
+                                                const percent = (item.count / maxCount) * 100;
+
+                                                return (
+                                                    <div
+                                                        key={item.date}
+                                                        className="rounded-[18px] border border-[#e7eef6] bg-[#f8fbff] p-4 shadow-[0_6px_16px_rgba(15,23,42,0.04)]"
+                                                    >
+                                                        <div className="flex items-center justify-between gap-4">
+                                                            <div className="min-w-0">
+                                                                <p className="text-[15px] font-semibold text-[#1d2c44]">
+                                                                    {item.date}
+                                                                </p>
+                                                                <p className="mt-1 text-[13px] text-[#94a3b8]">
+                                                                    Kunlik bemorlar soni
+                                                                </p>
+                                                            </div>
+
+                                                            <div className="shrink-0 text-right">
+                                                                <p className="text-[22px] font-extrabold leading-none text-[#1d9bf0]">
+                                                                    {item.count}
+                                                                </p>
+                                                                <p className="mt-1 text-[12px] font-medium text-[#94a3b8]">
+                                                                    ta bemor
+                                                                </p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="mt-4 h-[8px] overflow-hidden rounded-full bg-[#dff0ff]">
+                                                            <div
+                                                                className="h-full rounded-full bg-gradient-to-r from-[#38bdf8] to-[#2563eb] transition-all duration-500"
+                                                                style={{ width: `${percent}%` }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
-                                    </div>
+                                    ) : (
+                                        <div className="flex h-[190px] items-center justify-center">
+                                            <div className="text-center text-[#8ea1bb]">
+                                                <ChartColumn className="mx-auto h-8 w-8" />
+                                                <p className="mt-3 text-[16px] font-medium">Ma’lumot yo‘q</p>
+                                                <p className="mt-1 text-[13px] text-[#a0aec0]">
+                                                    Kunlik bemorlar statistikasi hali mavjud emas
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="h-[126px]" />
                             </div>
-                        </div>
 
-                        {/* BOTTOM GRID */}
-                        <div className="grid gap-6 xl:grid-cols-2">
-                            <div className="rounded-[24px] border border-[#e6edf5] bg-white p-5 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
+                        </div>
+                        {/* umumiy statistics qismni eng faol shifokorlar soni */}
+                        <div className="rounded-[24px] border border-[#e6edf5] bg-white p-5 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
+                            <div className="flex items-center justify-between gap-3">
                                 <div className="flex items-center gap-3">
                                     <Users className="h-5 w-5 text-[#1d9bf0]" />
                                     <h3 className="text-[18px] font-bold text-[#16253d]">
@@ -249,37 +415,108 @@ export default function StatisticsOverviewPage() {
                                     </h3>
                                 </div>
 
-                                <p className="mt-5 text-[24px] font-medium text-[#94a3b8]">—</p>
+                                <span className="text-[15px] font-medium text-[#97a6bc]">
+                                    {data?.topDoctors?.length ?? 0} ta
+                                </span>
                             </div>
 
-                            <div className="rounded-[24px] border border-[#e6edf5] bg-white p-5 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
-                                <div className="flex items-center gap-3">
-                                    <ChartColumn className="h-5 w-5 text-[#10b981]" />
-                                    <h3 className="text-[18px] font-bold text-[#16253d]">
-                                        Shifokorlar: bemorlar va tushum
-                                    </h3>
+                            {data?.topDoctors?.length ? (
+                                <div className="mt-5 max-h-[260px] space-y-3 overflow-y-auto pr-2">
+                                    {data.topDoctors.map((doctor) => {
+                                        const maxPatients = Math.max(
+                                            ...data.topDoctors.map((item) => item.patients_count),
+                                            1
+                                        );
+                                        const percent = (doctor.patients_count / maxPatients) * 100;
+
+                                        return (
+                                            <div
+                                                key={doctor.id}
+                                                className="rounded-[18px] border border-[#eef2f7] bg-[#fbfcfe] p-4"
+                                            >
+                                                <div className="flex items-center justify-between gap-4">
+                                                    <div className="flex min-w-0 items-center gap-3">
+                                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#e8f4ff] text-[14px] font-bold text-[#1d9bf0]">
+                                                            {doctor.id}
+                                                        </div>
+
+                                                        <div className="min-w-0">
+                                                            <p className="truncate text-[15px] font-semibold text-[#1d2c44]">
+                                                                {doctor.doctor_name}
+                                                            </p>
+                                                            <p className="mt-1 text-[13px] text-[#94a3b8]">
+                                                                Faol qabul soni
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="shrink-0 text-right">
+                                                        <p className="text-[20px] font-extrabold leading-none text-[#1d9bf0]">
+                                                            {doctor.patients_count}
+                                                        </p>
+                                                        <p className="mt-1 text-[12px] font-medium text-[#94a3b8]">
+                                                            ta bemor
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="mt-4 h-[8px] overflow-hidden rounded-full bg-[#e8f4ff]">
+                                                    <div
+                                                        className="h-full rounded-full bg-gradient-to-r from-[#38bdf8] to-[#2563eb]"
+                                                        style={{ width: `${percent}%` }}
+                                                    />
+                                                </div>
+
+                                                <div className="mt-3 flex items-center justify-between text-[13px]">
+                                                    <span className="text-[#94a3b8]">Tushum</span>
+                                                    <span className="font-semibold text-[#1d2c44]">
+                                                        {doctor.revenue.toLocaleString()} UZS
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
-
-                                <div className="mt-10 h-[120px]" />
-                            </div>
+                            ) : (
+                                <div className="mt-5 flex h-[180px] items-center justify-center rounded-[18px] border border-dashed border-[#dbe4ee] bg-[#f8fafc] text-center text-[#8ea1bb]">
+                                    <div>
+                                        <Users className="mx-auto h-8 w-8 text-[#b0bfd4]" />
+                                        <p className="mt-3 text-[16px] font-medium">Ma’lumot yo‘q</p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
-                        {/* DATE CARDS */}
+                        {/* umumiy statistics qismi date bo'g'liq */}
                         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-                            {chartDates.map((date) => (
-                                <div
-                                    key={date}
-                                    className="rounded-[14px] border border-[#edf2f7] bg-[#f8fafc] px-5 py-4"
-                                >
-                                    <p className="text-[18px] font-medium text-[#7b8aa0]">
-                                        {date}
-                                    </p>
-                                    <p className="mt-2 text-[28px] font-extrabold leading-none text-[#1d2c44]">
-                                        0
-                                    </p>
-                                </div>
-                            ))}
+                            {chartDates.map((date) => {
+                                const revenueItem = data?.dailyRevenue?.find((item) => item.date === date);
+                                const patientItem = data?.dailyPatients?.find((item) => item.date === date);
+
+                                return (
+                                    <div
+                                        key={date}
+                                        className="rounded-[16px] border border-[#edf2f7] bg-[#f8fafc] px-5 py-4 shadow-[0_6px_16px_rgba(15,23,42,0.03)]"
+                                    >
+                                        <p className="text-[16px] font-medium text-[#7b8aa0]">
+                                            {date}
+                                        </p>
+
+                                        <p className="mt-3 text-[26px] font-extrabold leading-none text-[#1d2c44]">
+                                            {revenueItem ? revenueItem.amount.toLocaleString() : 0}
+                                        </p>
+
+                                        <div className="mt-3 flex items-center justify-between text-[13px]">
+                                            <span className="text-[#94a3b8]">Bemorlar</span>
+                                            <span className="font-semibold text-[#1d9bf0]">
+                                                {patientItem ? patientItem.count : 0} ta
+                                            </span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
+
                     </div>
                 )}
             </section>

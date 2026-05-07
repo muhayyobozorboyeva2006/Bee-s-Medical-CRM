@@ -4,6 +4,7 @@ html,
 body {
   margin: 0;
   padding: 0;
+  min-height: 100%;
 }
 
 body {
@@ -11,7 +12,14 @@ body {
   color: #1d2c44;
 }
 
-* {
+html.dark body {
+  background: #020617;
+  color: #e2e8f0;
+}
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -25,7 +33,7 @@ body {
   border-radius: 9999px;
 }
 
-.dark body {
-  background: #020617;
-  color: #e2e8f0;
+html,
+body {
+  overscroll-behavior: none;
 }

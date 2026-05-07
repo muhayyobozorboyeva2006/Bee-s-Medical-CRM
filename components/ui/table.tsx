@@ -1,7 +1,9 @@
-const button = () => {
+import React from "react";
+
+export const Table = ({ children }: any) => {
     return (
-        <>
-            page</>
-    )
-}
-export default button
+        <table className="w-full border">
+            {children}
+        </table>
+    );
+};

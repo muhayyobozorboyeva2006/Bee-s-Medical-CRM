@@ -1,7 +1,20 @@
-const page = () => {
+"use client";
+
+import { useRouter } from "next/navigation";
+import ServiceForm from "@/components/services/service-form";
+import { useCreateService } from "@/features/services/hooks/use-services";
+
+export default function CreateServicePage() {
+    const router = useRouter();
+    const { submitService } = useCreateService();
+
     return (
-        <>
-            page</>
-    )
+        <ServiceForm
+            mode="create"
+            onSubmit={async (payload) => {
+                await submitService(payload);
+                router.push("/services");
+            }}
+        />
+    );
 }
-export default page

@@ -1,7 +1,20 @@
-const page = () => {
+"use client";
+
+import { useRouter } from "next/navigation";
+import DoctorForm from "@/components/doctors/doctor-form";
+import { useCreateDoctor } from "@/features/doctors/hooks/use-doctors";
+
+export default function CreateDoctorPage() {
+    const router = useRouter();
+    const { submitDoctor } = useCreateDoctor();
+
     return (
-        <>
-            page</>
-    )
+        <DoctorForm
+            mode="create"
+            onSubmit={async (payload) => {
+                await submitDoctor(payload);
+                router.push("/doctors");
+            }}
+        />
+    );
 }
-export default page

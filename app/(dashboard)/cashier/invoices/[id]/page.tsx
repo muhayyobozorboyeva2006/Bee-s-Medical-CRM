@@ -1,7 +1,7 @@
 const page = () => {
     return (
         <>
-            page</>
+            page7</>
     )
 }
 export default page
