@@ -12,20 +12,19 @@ export const useProducts = () => {
     const [items, setItems] = useState<ProductItem[]>([]);
     const [loading, setLoading] = useState(false);
 
-    //  ENG MUHIM JOY
     const [filters, setFilters] = useState<ProductsFilters>({});
 
     const fetchData = async () => {
         setLoading(true);
 
-        //  FILTERNI API GA BERAMIZ
+      
         const res = await getProducts(filters);
 
         setItems(res.items);
         setLoading(false);
     };
 
-    //  FILTER O‘ZGARSA QAYTA FETCH
+   
     useEffect(() => {
         fetchData();
     }, [filters]);

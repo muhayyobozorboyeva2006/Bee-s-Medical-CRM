@@ -1,5 +1,5 @@
 import type { StatisticsOverviewResponse } from "../types/faktur-statistics.types";
-// import axios from "@/lib/axios";
+
 
 export const getStatisticsOverview =
     async (): Promise<StatisticsOverviewResponse> => {
@@ -18,7 +18,7 @@ export const getStatisticsOverview =
 
 /*
 Haqqiy backend kelganda  shun qo'yish kerak:
-
+import axios from "@/lib/axios";
 export const getStatisticsOverview =
   async (): Promise<StatisticsOverviewResponse> => {
     const { data } = await axios.get("/statistics/overview");

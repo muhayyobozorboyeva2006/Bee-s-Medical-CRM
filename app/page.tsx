@@ -4,7 +4,7 @@ import CalendarPage from "./(dashboard)/calendar/page";
 export default function HomePage() {
   return (
     <AppShell>
-      <CalendarPage />
+      Salom
     </AppShell>
   );
 }
